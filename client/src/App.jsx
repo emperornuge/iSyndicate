@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from './api.js';
 
-const STORAGE_KEY = 'mobempire_user';
+const STORAGE_KEY = 'isyndicate_user';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -124,7 +124,7 @@ export default function App() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-        <h1 className="text-4xl font-extrabold tracking-wider text-red-600 mb-1 uppercase drop-shadow">Mob Empire</h1>
+        <h1 className="text-4xl font-extrabold tracking-wider text-red-600 mb-1 uppercase drop-shadow">iSyndicate</h1>
         <p className="text-slate-400 text-xs mb-8 tracking-widest uppercase">Underworld Syndicate Empire</p>
 
         <div className="w-full dark-card p-6 rounded-xl space-y-4">

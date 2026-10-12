@@ -3,12 +3,12 @@
     "cors": "^2.8.5",
     "express": "^4.21.2"
   },
-  "description": "Mob Empire game API server (Express + SQLite)",
+  "description": "iSyndicate game API server (Express + SQLite)",
   "engines": {
     "node": ">=20"
   },
   "main": "src/index.js",
-  "name": "mob-empire-server",
+  "name": "isyndicate-server",
   "private": true,
   "scripts": {
     "dev": "node --watch src/index.js",

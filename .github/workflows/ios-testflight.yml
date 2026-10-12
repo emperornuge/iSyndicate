@@ -6,7 +6,7 @@
 # profiles to export or rotate by hand.
 #
 # Required GitHub secrets (repo Settings -> Secrets and variables -> Actions):
-#   API_URL           https URL of the hosted game server, e.g. https://mob-empire-api.fly.dev
+#   API_URL           https URL of the hosted game server, e.g. https://isyndicate-api.fly.dev
 #   ASC_KEY_ID        App Store Connect API key ID (10-char, e.g. ABC123DEFG)
 #   ASC_ISSUER_ID     App Store Connect issuer ID (UUID)
 #   ASC_PRIVATE_KEY   Contents of the AuthKey_<KEY_ID>.p8 file (the whole key text)
@@ -16,7 +16,7 @@
 #   1. Enroll in the Apple Developer Program ($99/yr).
 #   2. In App Store Connect, create an API key with "App Manager" (or Admin)
 #      role; save the Issuer ID, Key ID, and download the .p8 once.
-#   3. Register the bundle ID `com.mobempire.game` (Identifiers -> +).
+#   3. Register the bundle ID `com.isyndicate.game` (Identifiers -> +).
 #      (Change this + capacitor.config.js + App Store Connect record together
 #       when the final game name is chosen.)
 #   4. Create the app record in App Store Connect (name, SKU, bundle ID).

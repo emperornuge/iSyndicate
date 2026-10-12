@@ -42,7 +42,7 @@ router.post('/login', (req, res) => {
       inventory: {},
       properties: {},
       mobMembers: [],
-      logs: [{ id: Date.now(), msg: 'Welcome to Mob Empire! Perform missions to start building your criminal empire.', time: 'Just now' }],
+      logs: [{ id: Date.now(), msg: 'Welcome to iSyndicate! Perform missions to start building your criminal empire.', time: 'Just now' }],
       lastTick: Date.now(),
       lastIncomeTick: Date.now(),
     });

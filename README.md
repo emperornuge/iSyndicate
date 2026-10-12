@@ -1,13 +1,10 @@
-# Mob Empire (working title)
+# iSyndicate
 
 A multiplayer mobile crime-empire game in the spirit of classic Storm8's iMobsters —
 missions, PvP fight arena, equipment shop, real-estate income, mob invites, bank,
 hospital. iOS app built with Capacitor; authoritative game server in Node/Express
 with SQLite persistence.
 
-> **Name is a placeholder.** "iMobsters" is Storm8's trademark and can't ship.
-> Rename in `capacitor.config.js` (`appName`, `appId`), the App Store Connect
-> record, and the workflow's bundle-ID comment before submitting for review.
 
 ## Layout
 
@@ -48,10 +45,10 @@ cd client && npx vite
 ```bash
 # needs the fly CLI: https://fly.io/docs/hands-on/install-flyctl/
 cd server
-fly launch --no-deploy        # accept the generated name, e.g. mob-empire-api
-fly volumes create mob_empire_data --size 1 --region iad
+fly launch --no-deploy        # accept the generated name, e.g. isyndicate-api
+fly volumes create isyndicate_data --size 1 --region iad
 fly deploy
-fly open                      # note the https URL, e.g. https://mob-empire-api.fly.dev
+fly open                      # note the https URL, e.g. https://isyndicate-api.fly.dev
 ```
 
 That URL becomes the `API_URL` GitHub secret. The iOS app talks to it for
@@ -64,7 +61,7 @@ runs server-side.
    can't be delegated.
 2. **App Store Connect**: create an API key (App Manager role). Save the
    Issuer ID, Key ID, and the .p8 (downloaded once).
-3. **Register the bundle ID** `com.mobempire.game`, then create the app record.
+3. **Register the bundle ID** `com.isyndicate.game`, then create the app record.
 4. **Create a GitHub repo**, push this project, add the five secrets
    (`API_URL`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY`, `TEAM_ID`).
 5. Push to `main` -> the workflow builds, signs, and uploads to TestFlight

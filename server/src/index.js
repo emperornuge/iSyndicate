@@ -15,7 +15,7 @@ app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 app.use('/api', routes);
 
 app.get('/', (req, res) => {
-  res.send('Mob Empire API — game server running. The iOS app talks to /api.');
+  res.send('iSyndicate API — game server running. The iOS app talks to /api.');
 });
 
 const PORT = process.env.PORT || 3000;
@@ -25,5 +25,5 @@ seedBots();
 startTick();
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Mob Empire API listening on :${PORT}`);
+  console.log(`iSyndicate API listening on :${PORT}`);
 });

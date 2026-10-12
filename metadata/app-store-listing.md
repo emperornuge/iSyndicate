@@ -1,7 +1,7 @@
-# App Store listing draft (working title: Mob Empire)
+# App Store listing draft
 
 ## Name (30 chars max)
-Mob Empire: Syndicate Wars
+iSyndicate
 
 ## Subtitle (30 chars max)
 Build your crime empire

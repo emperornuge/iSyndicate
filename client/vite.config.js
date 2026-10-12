@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // Dev: /api is proxied to the local game server (npm run dev in server/).
 // Prod (iOS bundle): set VITE_API_URL to the hosted API, e.g.
-//   https://mob-empire-api.fly.dev
+//   https://isyndicate-api.fly.dev
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
