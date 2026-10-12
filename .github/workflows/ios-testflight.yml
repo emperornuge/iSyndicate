@@ -1,0 +1,139 @@
+# Builds the Capacitor iOS app on a macOS runner and uploads straight to
+# TestFlight on every push to main (plus manual runs from the Actions tab).
+#
+# Signing is fully automatic: Xcode talks to App Store Connect with an API key
+# (-allowProvisioningUpdates) so there are no certificates or provisioning
+# profiles to export or rotate by hand.
+#
+# Required GitHub secrets (repo Settings -> Secrets and variables -> Actions):
+#   API_URL           https URL of the hosted game server, e.g. https://mob-empire-api.fly.dev
+#   ASC_KEY_ID        App Store Connect API key ID (10-char, e.g. ABC123DEFG)
+#   ASC_ISSUER_ID     App Store Connect issuer ID (UUID)
+#   ASC_PRIVATE_KEY   Contents of the AuthKey_<KEY_ID>.p8 file (the whole key text)
+#   TEAM_ID           Apple Developer team ID (10-char, e.g. XYZ987ABCD)
+#
+# One-time Apple-side setup (all in the browser, ~10 minutes):
+#   1. Enroll in the Apple Developer Program ($99/yr).
+#   2. In App Store Connect, create an API key with "App Manager" (or Admin)
+#      role; save the Issuer ID, Key ID, and download the .p8 once.
+#   3. Register the bundle ID `com.mobempire.game` (Identifiers -> +).
+#      (Change this + capacitor.config.js + App Store Connect record together
+#       when the final game name is chosen.)
+#   4. Create the app record in App Store Connect (name, SKU, bundle ID).
+#      First TestFlight upload creates the first build; no review needed for
+#      internal testers.
+
+name: iOS TestFlight
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - name: Check required secrets
+        run: |
+          missing=0
+          for name in API_URL ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY TEAM_ID; do
+            val="$(printenv "SECRET_$name")"
+            if [ -z "$val" ]; then echo "::error::Missing secret: $name"; missing=1; fi
+          done
+          if [ "$missing" = "1" ]; then
+            echo "::error::Add the missing secrets under repo Settings -> Secrets and variables -> Actions, then re-run."
+            exit 1
+          fi
+        env:
+          SECRET_API_URL: ${{ secrets.API_URL }}
+          SECRET_ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          SECRET_ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          SECRET_ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          SECRET_TEAM_ID: ${{ secrets.TEAM_ID }}
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build web bundle
+        env:
+          VITE_API_URL: ${{ secrets.API_URL }}
+        run: npm run build:client
+
+      - name: Sync Capacitor iOS shell
+        run: npx cap sync ios
+
+      - name: Write App Store Connect API key
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
+          chmod 600 "$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
+        env:
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+
+      - name: Write ExportOptions.plist
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>teamID</key>
+            <string>${TEAM_ID}</string>
+          </dict>
+          </plist>
+          EOF
+        env:
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+
+      - name: Archive (Release)
+        run: |
+          xcodebuild archive \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+
+      - name: Export + upload to TestFlight
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
